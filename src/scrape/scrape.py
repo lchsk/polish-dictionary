@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import urllib2
+import os
 
 from bs4 import BeautifulSoup
 
@@ -9,7 +10,7 @@ OMIT = [u'–', u'-']
 URL = 'https://pl.wiktionary.org/wiki/'
 
 def clean_word(word):
-    return ''.join(word.split())
+    return word.replace('\t', '').replace('\n', '').replace('\r', '')
 
 def load_web_soup(word):
     return BeautifulSoup(
@@ -63,6 +64,10 @@ def main():
     for i, word in enumerate(words):
         word = clean_word(word)
 
+        if os.path.exists('../tmp/{0}'.format(word)):
+            print '%s already exists, skip' % word
+            continue
+
         print 'Word %s/%s (%.4f%%). Downloading %s' % (
             i,
             n_words,
@@ -70,7 +75,11 @@ def main():
             word,
         )
 
-        soup = load_web_soup(word)
+        try:
+            soup = load_web_soup(word)
+        except urllib2.HTTPError as e:
+            print 'Could not find %s' % word
+            continue
 
         print 'Downloaded %s' % word
 
