@@ -2,30 +2,34 @@
 # -*- encoding: utf-8 -*-
 
 import os
-import MySQLdb
+import pymysql.cursors
 
-db = MySQLdb.connect(
+conn = pymysql.connect(
     host=os.getenv("HOST"),
     user=os.getenv("USER"),
-    passwd=os.getenv("PASS"),
+    password=os.getenv("PASS"),
     db=os.getenv("DB"),
     charset='utf8',
+    cursorclass=pymysql.cursors.DictCursor,
 )
 
-cur = db.cursor()
+try:
+    with conn.cursor() as cur:
+        cur.execute(
+            "select word from pldata where language=%s",
+            (u'język polski',)
+        )
 
-cur.execute(
-    "select word from pldata where language=%s",
-    ('język polski',)
-)
+        words = set()
 
-words = set()
+        for row in cur.fetchall():
+            words.add(row['word'])
 
-for row in cur.fetchall():
-    words.add(row[0])
+finally:
+    conn.close()
+
+print 'Loaded {} unique words'.format(len(words))
 
 with open('./pl_raw', 'w') as f:
     for word in sorted(words):
-        f.write('{}\n'.format(word))
-
-db.close()
+        f.write('{}\n'.format(word.encode('utf-8')))
