@@ -10,7 +10,14 @@ OMIT = [u'–', u'-']
 URL = 'https://pl.wiktionary.org/wiki/'
 
 def clean_word(word):
-    return word.replace('\t', '').replace('\n', '').replace('\r', '')
+    to_remove = ['\t', '\n', '\r']
+
+    for remove in to_remove:
+        word = word.replace(remove, '')
+
+    word = word.replace('/', '_')
+
+    return word
 
 def load_web_soup(word):
     return BeautifulSoup(
