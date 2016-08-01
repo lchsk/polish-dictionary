@@ -3,11 +3,15 @@
 
 import urllib2
 import os
+import re
 
 from bs4 import BeautifulSoup
 
 OMIT = [u'–', u'-']
 URL = 'https://pl.wiktionary.org/wiki/'
+
+re_no_brackets = re.compile(r'\[.*?\]')
+re_no_parens = re.compile(r'\(.*?\)')
 
 def clean_word(word):
     to_remove = ['\t', '\n', '\r']
@@ -18,6 +22,12 @@ def clean_word(word):
     word = word.replace('/', '_')
 
     return word
+
+def remove_within_brackets(string):
+    string = re.sub(re_no_brackets, '', string)
+    string = re.sub(re_no_parens, '', string)
+
+    return string
 
 def load_web_soup(word):
     return BeautifulSoup(
