@@ -69,7 +69,12 @@ def load_all(words):
 
 def output_fmt(word, only_ascii=False):
     if only_ascii:
-        return slugify(unicode(word, 'utf8'), lower=True, only_ascii=True, spaces=True)
+        return slugify(
+            unicode(word, 'utf8'),
+            lower=True,
+            only_ascii=True,
+            spaces=True,
+        )
 
     return word
 
