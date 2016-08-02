@@ -24,6 +24,19 @@ parser.add_argument(
     help='Generate a single file with all words (lower-case, ascii)',
 )
 
+parser.add_argument(
+    '--inflections',
+    action='store_true',
+    help='Generate a single file with infinitives and inflections',
+)
+
+parser.add_argument(
+    '--inflections_ascii',
+    action='store_true',
+    help='Generate a single file with infinitives and inflections '
+    '(lower-case, ascii)',
+)
+
 def get_words():
     words = []
 
@@ -78,13 +91,10 @@ def output_fmt(word, only_ascii=False):
 
     return word
 
-def generate_single_file(all_words, only_ascii=False):
+def generate_single_file(filename, all_words, only_ascii=False):
+    """Produces a single list of words, separated by newlines."""
+
     output = set()
-
-    filename = './pl_all'
-
-    if only_ascii:
-        filename += '_ascii'
 
     for inf, forms in all_words.iteritems():
         output.add(output_fmt(inf, only_ascii))
@@ -98,15 +108,52 @@ def generate_single_file(all_words, only_ascii=False):
         for word in words:
             f.write('{0}\n'.format(word))
 
+def generate_single_file_infl(filename, all_words, only_ascii=False):
+    """Produces a list of entries such as:
+    word=inflected_1, ..., inflected_n. """
+
+    with open(filename, 'w') as f:
+        for inf, forms in all_words.iteritems():
+
+            forms_output = [
+                output_fmt(form, only_ascii)
+                for form in forms
+            ]
+
+            f.write('{inf}={forms}\n'.format(
+                inf=output_fmt(inf, only_ascii),
+                forms=','.join(forms_output),
+            ))
+
 def main():
     args = parser.parse_args()
 
+    all_words = load_all(get_words())
+
     if args.all_words:
-        all_words = load_all(get_words())
-        generate_single_file(all_words, only_ascii=False)
+        generate_single_file(
+            './pl_all',
+            all_words,
+            only_ascii=False,
+        )
     elif args.all_words_ascii:
-        all_words = load_all(get_words())
-        generate_single_file(all_words, only_ascii=True)
+        generate_single_file(
+            './pl_all_ascii',
+            all_words,
+            only_ascii=True,
+        )
+    elif args.inflections:
+        generate_single_file_infl(
+            './pl_infl',
+            all_words,
+            only_ascii=False,
+        )
+    elif args.inflections_ascii:
+        generate_single_file_infl(
+            './pl_infl_ascii',
+            all_words,
+            only_ascii=True,
+        )
 
 if __name__ == '__main__':
     main()
