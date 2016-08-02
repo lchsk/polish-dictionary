@@ -3,6 +3,8 @@
 
 import argparse
 
+from slugify import slugify
+
 from scrape.scrape import (
     clean_word,
     remove_within_brackets,
@@ -19,7 +21,7 @@ parser.add_argument(
 parser.add_argument(
     '--all_words_ascii',
     action='store_true',
-    help='Generate a single file with all words (ascii)',
+    help='Generate a single file with all words (lower-case, ascii)',
 )
 
 def get_words():
@@ -65,18 +67,29 @@ def load_all(words):
 
     return all_words
 
-def generate_single_file(all_words, ascii=False):
+def output_fmt(word, only_ascii=False):
+    if only_ascii:
+        return slugify(unicode(word, 'utf8'), lower=True, only_ascii=True, spaces=True)
+
+    return word
+
+def generate_single_file(all_words, only_ascii=False):
     output = set()
 
+    filename = './pl_all'
+
+    if only_ascii:
+        filename += '_ascii'
+
     for inf, forms in all_words.iteritems():
-        output.add(inf)
+        output.add(output_fmt(inf, only_ascii))
 
         for form in forms:
-            output.add(form)
+            output.add(output_fmt(form, only_ascii))
 
     words = sorted(output)
 
-    with open('./pl_all', 'w') as f:
+    with open(filename, 'w') as f:
         for word in words:
             f.write('{0}\n'.format(word))
 
@@ -85,7 +98,10 @@ def main():
 
     if args.all_words:
         all_words = load_all(get_words())
-        generate_single_file(all_words)
+        generate_single_file(all_words, only_ascii=False)
+    elif args.all_words_ascii:
+        all_words = load_all(get_words())
+        generate_single_file(all_words, only_ascii=True)
 
 if __name__ == '__main__':
     main()
