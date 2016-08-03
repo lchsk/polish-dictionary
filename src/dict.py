@@ -37,6 +37,20 @@ parser.add_argument(
     '(lower-case, ascii)',
 )
 
+parser.add_argument(
+    '--inflected_to_inf',
+    action='store_true',
+    help='Generate a single file with inflected words mapped to '
+    'infinitives',
+)
+
+parser.add_argument(
+    '--inflected_to_inf_ascii',
+    action='store_true',
+    help='Generate a single file with inflected words mapped to '
+    'infinitives (lower-case, ascii)',
+)
+
 def get_words():
     words = []
 
@@ -125,6 +139,22 @@ def generate_single_file_infl(filename, all_words, only_ascii=False):
                 forms=','.join(forms_output),
             ))
 
+def generate_single_file_infl_to_inf(
+    filename,
+    all_words,
+    only_ascii=False,
+):
+    """Generate a list of inflected words mapped to their
+    infinitives."""
+
+    with open(filename, 'w') as f:
+        for inf, forms in all_words.iteritems():
+            for form in forms:
+                f.write('{inflected}={inf}\n'.format(
+                    inf=output_fmt(inf, only_ascii),
+                    inflected=output_fmt(form, only_ascii),
+                ))
+
 def main():
     args = parser.parse_args()
 
@@ -151,6 +181,18 @@ def main():
     elif args.inflections_ascii:
         generate_single_file_infl(
             './pl_infl_ascii',
+            all_words,
+            only_ascii=True,
+        )
+    elif args.inflected_to_inf:
+        generate_single_file_infl_to_inf(
+            './pl_infl_to_inf',
+            all_words,
+            only_ascii=False,
+        )
+    elif args.inflected_to_inf_ascii:
+        generate_single_file_infl_to_inf(
+            './pl_infl_to_inf_ascii',
             all_words,
             only_ascii=True,
         )
