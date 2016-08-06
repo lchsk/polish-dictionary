@@ -150,9 +150,19 @@ def generate_single_file_infl_to_inf(
     with open(filename, 'w') as f:
         for inf, forms in all_words.iteritems():
             for form in forms:
+                # Handle negation
+                if (
+                    form.startswith('nie') and
+                    not form.startswith('niech') and
+                    not inf.startswith('nie')
+                ):
+                    infinitive = '_' + inf
+                else:
+                    infinitive = inf
+
                 f.write('{inflected}={inf}\n'.format(
-                    inf=output_fmt(inf, only_ascii),
                     inflected=output_fmt(form, only_ascii),
+                    inf=output_fmt(infinitive, only_ascii),
                 ))
 
 def main():
